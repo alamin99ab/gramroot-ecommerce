@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "gramrootfoods-collection-001",
+    "name": "GramRootFoods API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alamin\",\n  \"email\": \"alamin@example.com\",\n  \"phone\": \"017xxxxxxxx\",\n  \"password\": \"123456\",\n  \"referralCode\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "register"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"alamin@example.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"017xxxxxxxx\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/send-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "send-otp"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"017xxxxxxxx\",\n  \"otp\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/verify-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "verify-otp"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Products",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/products?category=Rural&search=গুড়",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products"],
+          "query": [
+            {
+              "key": "category",
+              "value": "Rural"
+            },
+            {
+              "key": "search",
+              "value": "গুড়"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Single Product",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":id"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 5,\n  \"comment\": \"খুব ভালো ছিলো!\",\n  \"image\": \"base64stringoptional\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/reviews/:productId",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "reviews", ":productId"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Place Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    { \"productId\": \"id1\", \"qty\": 2 },\n    { \"productId\": \"id2\", \"qty\": 1 }\n  ],\n  \"address\": \"Dhaka, Bangladesh\",\n  \"paymentMethod\": \"COD\",\n  \"coinUsed\": 50\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Track Order",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/orders/track/:orderId",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders", "track", ":orderId"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
