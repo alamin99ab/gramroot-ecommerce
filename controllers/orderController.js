@@ -1,4 +1,3 @@
-// controllers/orderController.js
 const Order = require('../models/Order');
 const User = require('../models/User');
 const PDFDocument = require('pdfkit');
@@ -28,11 +27,36 @@ exports.placeOrder = async (req, res) => {
   res.status(201).json({ message: "Order placed", orderId: order._id });
 };
 
-// 🚚 Track Order
+// 🚚 Track Order by ID (internal use)
 exports.trackOrder = async (req, res) => {
   const order = await Order.findById(req.params.orderId).populate('items.productId');
   if (!order) return res.status(404).json({ message: "Order not found" });
   res.json(order);
+};
+
+// 🚚 Track Order by trackingId (public use)
+exports.trackOrderPublic = async (req, res) => {
+  const { trackingId } = req.query;
+
+  if (!trackingId) {
+    return res.status(400).json({ success: false, message: "Tracking ID is required" });
+  }
+
+  const order = await Order.findOne({ trackingId }).populate('items.productId');
+  if (!order) {
+    return res.status(404).json({ success: false, message: "Order not found" });
+  }
+
+  res.json({
+    success: true,
+    trackingId: order.trackingId,
+    status: order.isDelivered ? 'Delivered' : 'Processing',
+    estimatedDelivery: order.estimatedDelivery,
+    items: order.items.map(item => ({
+      name: item.productId?.name,
+      qty: item.qty
+    }))
+  });
 };
 
 // 📄 Order History
@@ -41,7 +65,7 @@ exports.orderHistory = async (req, res) => {
   res.json(orders);
 };
 
-// 📄 Invoice PDF (dummy text for now)
+// 📄 Invoice PDF
 exports.getInvoice = async (req, res) => {
   const order = await Order.findById(req.params.orderId).populate('items.productId');
   if (!order) return res.status(404).json({ message: "Order not found" });

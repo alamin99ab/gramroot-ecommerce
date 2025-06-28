@@ -3,11 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-};
+const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
-// Register (send OTP, no JWT yet)
 exports.register = async (req, res) => {
   const { name, phone, email, password, referralCode } = req.body;
   const ip = req.ip || req.connection.remoteAddress;
@@ -18,7 +15,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpire = Date.now() + 5 * 60 * 1000; // 5 min from now
+    const otpExpire = Date.now() + 5 * 60 * 1000;
 
     const newUser = new User({
       name,
@@ -35,7 +32,6 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    // Send OTP Email
     if (email) {
       const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -61,7 +57,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// Verify OTP and send JWT
 exports.verifyOtp = async (req, res) => {
   const { email, phone, otp } = req.body;
 
@@ -69,11 +64,11 @@ exports.verifyOtp = async (req, res) => {
     const user = await User.findOne({ $or: [{ email }, { phone }] });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (user.isVerified)
-      return res.status(400).json({ message: 'User already verified' });
+    if (user.isVerified) return res.status(400).json({ message: 'User already verified' });
 
-    if (user.otpCode !== otp || user.otpExpires < Date.now())
+    if (user.otpCode !== otp || user.otpExpires < Date.now()) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
 
     user.isVerified = true;
     user.otpCode = null;
@@ -95,7 +90,6 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
-// Login (only verified users)
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -109,6 +103,19 @@ exports.login = async (req, res) => {
     if (!user.isVerified) return res.status(403).json({ message: 'Please verify your account first' });
 
     const token = generateToken(user._id);
+
+    if (user.role && user.role.includes('admin')) {
+      const userAgent = req.headers['user-agent'];
+      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      user.activeSession = {
+        token,
+        userAgent,
+        ip,
+        loginAt: new Date()
+      };
+      await user.save();
+    }
+
     res.json({
       token,
       user: {

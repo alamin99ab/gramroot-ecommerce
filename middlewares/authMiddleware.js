@@ -12,7 +12,13 @@ const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     res.status(401).json({ message: 'Unauthorized: Invalid token' });
@@ -20,8 +26,8 @@ const protect = async (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-  if (req.user.role !== 'super-admin') {
-    return res.status(403).json({ message: 'Forbidden: Admins only' });
+  if (!req.user || req.user.role !== 'super-admin') {
+    return res.status(403).json({ message: 'Forbidden: Super Admins only' });
   }
   next();
 };
